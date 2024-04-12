@@ -1,0 +1,4 @@
+intel-intrinsics d library sucks
+sim-d library goat
+
+use release ldc2 or dont
