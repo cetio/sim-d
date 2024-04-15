@@ -10,6 +10,7 @@ align (64) private struct _mask32x8(bool ZEROED)
 public:
 final:
 @nogc:
+pragma(inline, true):
     alias pack = ubyte;
 
     int8 data;

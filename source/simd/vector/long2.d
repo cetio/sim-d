@@ -15,49 +15,49 @@ pragma(inline, true):
 
     mixin(vboilerplate!"mask64x2");
 
-    long2 opBinary(string op, T)(const scope T val) const pure
+    long2 opBinary(string op, T)(scope T val) const pure
         if (isM128!T || isZ128!T)
     {
-        static if (op == "+" && LDC_with_AVX512)
+        static if (op == "+" && AVX512F && AVX512VL)
         {
             auto ret = __asm!(__vector(long[2]))("
-                vpaddq $1, $1, $2 {%k1} "~isZMask128!T ? "{z}" : ""
+                vpaddq $1, $2, $1 {%k1} "~(isZ128!T ? "{z}" : "")
             , "=v,v,v,{k1}", data, val.data, val.movmsk);
             return *cast(long2*)&ret;
         }
-        else static if (op == "-" && LDC_with_AVX512)
+        else static if (op == "-" && AVX512F && AVX512VL2)
         {
             auto ret = __asm!(__vector(long[2]))("
-                vpsubq $1, $1, $2 {%k1} "~isZMask128!T ? "{z}" : ""
+                vpsubq $1, $2, $1 {%k1} "~(isZ128!T ? "{z}" : "")
             , "=v,v,v,{k1}", data, val.data, val.movmsk);
             return *cast(long2*)&ret;
         }
-        else static if (op == "^" && LDC_with_AVX512)
+        else static if (op == "^" && AVX512F && AVX512VL)
         {
             auto ret = __asm!(__vector(long[2]))("
-                vpxorq $1, $1, $2 {%k1} "~isZMask128!T ? "{z}" : ""
+                vpxorq $1, $2, $1 {%k1} "~(isZ128!T ? "{z}" : "")
+            , "=v,v,v,{k1}", cast(__vector(long[2]))data, val.data, val.movmsk);
+            return *cast(long2*)&ret;
+        }
+        else static if (op == "|" && AVX512F && AVX512VL)
+        {
+            auto ret = __asm!(__vector(long[2]))("
+                vporq $1, $2, $1 {%k1} "~(isZ128!T ? "{z}" : "")
             , "=v,v,v,{k1}", data, val.data, val.movmsk);
             return *cast(long2*)&ret;
         }
-        else static if (op == "|" && LDC_with_AVX512)
+        else static if (op == "&" && AVX512F && AVX512VL)
         {
             auto ret = __asm!(__vector(long[2]))("
-                vporq $1, $1, $2 {%k1} "~isZMask128!T ? "{z}" : ""
-            , "=v,v,v,{k1}", data, val.data, val.movmsk);
-            return *cast(long2*)&ret;
-        }
-        else static if (op == "&" && LDC_with_AVX512)
-        {
-            auto ret = __asm!(__vector(long[2]))("
-                vpandq $1, $1, $2 {%k1} "~isZMask128!T ? "{z}" : ""
+                vpandq $1, $2, $1 {%k1} "~(isZ128!T ? "{z}" : "")
             , "=v,v,v,{k1}", data, val.data, val.movmsk);
             return *cast(long2*)&ret;
         }
         else
         {
             long2 ret = this;
-            mixin("val.data "~op~"= ret;");
-            return ret = val;
+            ret = mixin("val "~op~" ret");
+            return ret;
         }
     }
 }
@@ -108,7 +108,7 @@ final:
     pragma(inline, true):
     auto shuffle32x4(const scope int[4] ctrl) const pure @trusted
     {
-        static if (LDC_with_AVX2)
+        static if (AVX2)
         {
             // Defering initialization here has no impact on generation,
             // but it looks better and ensures consistency across versions.
@@ -157,7 +157,7 @@ final:
     pragma(inline, true):
     auto shuffle8x16(const scope byte[16] ctrl) const pure @trusted
     {
-        static if (LDC_with_SSSE3)
+        static if (SSSE3)
         {
             auto ret = __builtin_ia32_pshufb128(cast(__vector(byte[16]))data, cast(__vector(byte[16]))ctrl);
             return *cast(long2*)&ret;
@@ -188,7 +188,7 @@ final:
 
     auto blend8x16(const scope long[2] val, byte[16] ctrl)
     {
-        static if (LDC_with_SSE41)
+        static if (SSE41)
         {
             auto ret = __builtin_ia32_pblendvb128(cast(__vector(byte[16]))data, cast(__vector(byte[16]))val, cast(__vector(byte[16]))ctrl);
             return *cast(long2*)&ret;

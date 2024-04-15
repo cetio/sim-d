@@ -10,5 +10,6 @@ align (32) public struct short16
 public:
 final:
 @nogc:
+pragma(inline, true):
     enum length = 16;
 }

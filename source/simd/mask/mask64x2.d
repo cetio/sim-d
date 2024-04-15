@@ -35,7 +35,7 @@ pragma(inline, true):
     this(ubyte mask) pure
     {
         // TODO: AVX512 checks should be based on feature
-        static if (LDC_with_AVX512)
+        static if (AVX512DQ && AVX512VL)
         {
             auto ret = __asm!(__vector(long[2]))("
                 vpmovm2q $1, $0
@@ -70,9 +70,9 @@ pragma(inline, true):
         return this;
     }
 
-    ubyte movmsk()
+    ubyte movmsk() const
     {
-        static if (LDC_with_SSE2)
+        static if (SSE2)
             return cast(ubyte)__builtin_ia32_movmskpd(cast(__vector(double[2]))mask);
         else
             return ((mask[0] == -1) << 0) | ((mask[1] == -1) << 1);

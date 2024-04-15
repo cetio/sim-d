@@ -13,3 +13,11 @@ public import simd.mask.mask16x16;
 
 public import simd.mask.mask8x16;
 public import simd.mask.mask8x32;
+
+/// Boilerplate mixin for all mask types.
+public template mboilerplate()
+{
+    enum mboilerplate = q{
+    
+    };
+}

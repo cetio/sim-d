@@ -10,5 +10,6 @@ align (16) public struct byte16
 public:
 final:
 @nogc:
+pragma(inline, true):
     enum length = 16;
 }

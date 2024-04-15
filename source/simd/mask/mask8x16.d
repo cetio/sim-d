@@ -10,6 +10,7 @@ align (32) private struct _mask8x16(bool ZEROED)
 public:
 final:
 @nogc:
+pragma(inline, true):
     alias pack = short;
 
     byte16 data;

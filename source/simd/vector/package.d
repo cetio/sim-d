@@ -45,6 +45,8 @@ package template vboilerplate(string MASK_TITLE)
         return this;
     }
 
+    // TODO: opAssign long/broadcast
+
     ref T opAssign(const scope M val) pure
     {
         data = (this & val.mask) | (val.data & ~val.mask);
@@ -60,14 +62,16 @@ package template vboilerplate(string MASK_TITLE)
     T opBinary(string op)(const scope U val) const pure
     {
         T ret = this;
-        mixin("ret[] "~op~"= val[];");
+        static foreach (i; 0..U.length)
+            mixin("ret[i] "~op~"= val[i];");
         return ret;
     }
 
     T opBinary(string op)(const scope E val) const pure
     {
         T ret = this;
-        mixin("ret[] "~op~"= val;");
+        static foreach (i; 0..U.length)
+            mixin("ret[i] "~op~"= val;");
         return ret;
     }
 
@@ -81,59 +85,65 @@ package template vboilerplate(string MASK_TITLE)
         return opBinary!(op, Z)(val);
     }
 
-    T opOpAssign(string op)(const scope U val)
+    ref T opOpAssign(string op)(const scope U val)
     {
-        mixin("data[] "~op~"= val[];");
+        static foreach (i; 0..U.length)
+            mixin("data[i] "~op~"= val[i];");
         return this;
     }
 
-    T opOpAssign(string op)(const scope E val)
+    ref T opOpAssign(string op)(const scope E val)
     {
-        mixin("data[] "~op~"= val;");
+        static foreach (i; 0..U.length)
+            mixin("data[i] "~op~"= val;");
+        return this;
+    }
+
+    ref T opOpAssign(string op)(const scope M val)
+    {
+        data = mixin("this "~op~" val");
+        return this;
+    }
+
+    ref T opOpAssign(string op)(const scope Z val)
+    {
+        data = mixin("this "~op~" val");
         return this;
     }
 
     T opUnary(string op)() const pure
     {
         T ret = this;
-        ret = mixin(op~"ret[]");
+        static foreach (i; 0..U.length)
+            mixin("ret[i] = "~op~"ret[i];");
         return ret;
     }
 
-    // These next 3 operators only exist for parity
     ref U opSlice() const pure
     {
-        return data;
+        return this;
     }
 
-    ref auto opSliceOpAssign(string op)(const scope U val) 
-    {
-        mixin("data[] "~op~"= val[];");
-        return data;
-    }
-
-    auto opSliceUnary(string op)() 
-    {
-        U ret = data;
-        ret = mixin(op~"data[]");
-        return ret;
-    }
-
-    pragma(inline, true):
     M opSlice(size_t start, size_t end) const pure
     {
         ubyte mask = (ubyte.max << start) & (ubyte.max >> ((M.pack.sizeof * 8) - end));
         return M(this, mask);
     }
 
-    M opSliceAssign(const scope U val, size_t start = 0, size_t end = 2) 
+    M opSliceAssign(const scope U val, size_t start, size_t end) 
     {
         ubyte mask = (ubyte.max << start) & (ubyte.max >> ((M.pack.sizeof * 8) - end));
         M ret = M(this, mask);
         data = ret;
         return ret;
     }
-    };
 
-    // TODO: opSliceOpAssign, opSliceUnary, etc.
+    M opSliceOpAssign(string op)(const scope U val, size_t start, size_t end)
+    {
+        ubyte mask = (ubyte.max << start) & (ubyte.max >> ((M.pack.sizeof * 8) - end));
+        M ret = M(this, mask);
+        data = mixin("this "~op~" ret");
+        return ret;
+    }
+    };
 }
