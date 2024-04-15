@@ -1,7 +1,6 @@
-module simd.vector.mask64x4;
+module simd.mask.mask64x4;
 
-import simd.features;
-import simd.vector;
+import simd;
 
 public alias mask64x4 = _mask64x4!false;
 public alias zmask64x4 = _mask64x4!true;

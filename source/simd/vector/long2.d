@@ -1,7 +1,6 @@
 module simd.vector.long2;
 
-import simd.features;
-import simd.vector;
+import simd;
 
 align (16) public struct long2
 {
@@ -11,12 +10,13 @@ align (16) public struct long2
 public:
 final:
 @nogc:
+pragma(inline, true):
     enum length = 2;
 
     mixin(vboilerplate!"mask64x2");
 
     long2 opBinary(string op, T)(const scope T val) const pure
-        if (isMask128!T || isZMask128!T)
+        if (isM128!T || isZ128!T)
     {
         static if (op == "+" && LDC_with_AVX512)
         {
@@ -88,7 +88,7 @@ final:
         return this;
     } */
 
-    pragma(inline)
+    pragma(inline, true):
     auto opBinary(string op)(const scope long[2] val) const pure
     {
         long2 ret = this;
@@ -96,7 +96,7 @@ final:
         return ret;
     }
 
-    pragma(inline)
+    pragma(inline, true):
     auto shuffle64x2(const scope long[2] ctrl) const pure
     {
         long[2] ret = void;
@@ -105,7 +105,7 @@ final:
         return cast(long[2])ret;
     }
 
-    pragma(inline)
+    pragma(inline, true):
     auto shuffle32x4(const scope int[4] ctrl) const pure @trusted
     {
         static if (LDC_with_AVX2)
@@ -132,7 +132,7 @@ final:
         }
     }
 
-    pragma(inline)
+    pragma(inline, true):
     auto shuffle16x8(const scope short[8] ctrl) const pure
     {
         // Not supported yet on LDC stable
@@ -154,7 +154,7 @@ final:
         return cast(long2)ret;
     }
 
-    pragma(inline)
+    pragma(inline, true):
     auto shuffle8x16(const scope byte[16] ctrl) const pure @trusted
     {
         static if (LDC_with_SSSE3)
@@ -172,13 +172,13 @@ final:
         }
     }
 
-    pragma(inline)
+    pragma(inline, true):
     auto opOpAssign(string op)(const scope long[2] val)
     {
         return mixin("data[] "~op~"= val[]");
     }
 
-    pragma(inline)
+    pragma(inline, true):
     auto opUnary(string op)() const pure
     {
         long2 ret = void;

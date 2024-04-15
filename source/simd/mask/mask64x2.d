@@ -1,7 +1,6 @@
-module simd.vector.mask64x2;
+module simd.mask.mask64x2;
 
-import simd.features;
-import simd.vector;
+import simd;
 
 public alias mask64x2 = _mask64x2!false;
 public alias zmask64x2 = _mask64x2!true;
@@ -11,6 +10,7 @@ align (32) private struct _mask64x2(bool ZEROED)
 public:
 final:
 @nogc:
+pragma(inline, true):
     alias pack = ubyte;
 
     long2 data;
@@ -58,21 +58,18 @@ final:
         this(mask);
     }
 
-    pragma(inline)
     long2 state() const pure
     {
         return data & mask;
     }
     alias state this;
 
-    pragma(inline)
     typeof(this) opAssign(const scope long[2] val)
     {
         data = (data & mask) | (long2(val) & ~mask);
         return this;
     }
 
-    pragma(inline)
     ubyte movmsk()
     {
         static if (LDC_with_SSE2)

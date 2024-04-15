@@ -12,39 +12,6 @@ public import simd.vector.short16;
 public import simd.vector.byte16;
 public import simd.vector.byte32;
 
-public import simd.vector.mask64x2;
-
-// I don't really care about guaranteeing this is correct, it's good enough for me.
-public enum isMask128(T) =
-{
-    static if (T.stringof.length <= 4)
-        return false;
-    else
-        return T.sizeof == 32 && T.stringof.length > 4 && T.stringof[0..4] == "mask";
-}();
-public enum isMask256(T) =
-{
-    static if (T.stringof.length <= 4)
-        return false;
-    else
-        return T.sizeof == 64 && T.stringof.length > 4 && T.stringof[0..4] == "mask";
-}();
-public enum isZMask128(T) =
-{
-    static if (T.stringof.length <= 5)
-        return false;
-    else
-        return T.sizeof == 32 && T.stringof.length > 4 && T.stringof[0..5] == "zmask";
-}();
-public enum isZMask256(T) =
-{
-    static if (T.stringof.length <= 5)
-        return false;
-    else
-        return T.sizeof == 64 && T.stringof.length > 4 && T.stringof[0..5] == "zmask";
-}();
-public enum isVector(T) = !isMask!T;
-
 /// Boilerplate mixin for all vector types.
 package template vboilerplate(string MASK_TITLE)
 {
@@ -97,6 +64,13 @@ package template vboilerplate(string MASK_TITLE)
         return ret;
     }
 
+    T opBinary(string op)(const scope E val) const pure
+    {
+        T ret = this;
+        mixin("ret[] "~op~"= val;");
+        return ret;
+    }
+
     T opBinary(string op)(const scope M val) const pure
     {
         return opBinary!(op, M)(val);
@@ -110,6 +84,12 @@ package template vboilerplate(string MASK_TITLE)
     T opOpAssign(string op)(const scope U val)
     {
         mixin("data[] "~op~"= val[];");
+        return this;
+    }
+
+    T opOpAssign(string op)(const scope E val)
+    {
+        mixin("data[] "~op~"= val;");
         return this;
     }
 
@@ -139,6 +119,7 @@ package template vboilerplate(string MASK_TITLE)
         return ret;
     }
 
+    pragma(inline, true):
     M opSlice(size_t start, size_t end) const pure
     {
         ubyte mask = (ubyte.max << start) & (ubyte.max >> ((M.pack.sizeof * 8) - end));
@@ -149,7 +130,7 @@ package template vboilerplate(string MASK_TITLE)
     {
         ubyte mask = (ubyte.max << start) & (ubyte.max >> ((M.pack.sizeof * 8) - end));
         M ret = M(this, mask);
-        data = (this & ~ret.mask) | (T(val) & ret.mask);
+        data = ret;
         return ret;
     }
     };

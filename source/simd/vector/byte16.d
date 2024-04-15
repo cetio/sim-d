@@ -1,7 +1,6 @@
 module simd.vector.byte16;
 
-import simd.features;
-import simd.vector;
+import simd;
 
 align (16) public struct byte16
 {

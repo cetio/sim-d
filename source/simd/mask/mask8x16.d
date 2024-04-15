@@ -1,7 +1,6 @@
-module simd.vector.mask8x16;
+module simd.mask.mask8x16;
 
-import simd.features;
-import simd.vector;
+import simd;
 
 public alias mask8x16 = _mask8x16!false;
 public alias zmask8x16 = _mask8x16!true;

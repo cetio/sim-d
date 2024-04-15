@@ -1,7 +1,6 @@
 module simd.vector.int4;
 
-import simd.features;
-import simd.vector;
+import simd;
 
 align (16) public struct int4
 {
