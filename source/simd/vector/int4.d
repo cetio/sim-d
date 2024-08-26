@@ -12,4 +12,6 @@ final:
 @nogc:
 pragma(inline, true):
     enum length = 4;
+
+    //mixin(vboilerplate!"mask32x4");
 }

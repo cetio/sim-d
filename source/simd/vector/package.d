@@ -13,14 +13,15 @@ public import simd.vector.byte16;
 public import simd.vector.byte32;
 
 /// Boilerplate mixin for all vector types.
-package template vboilerplate(string MASK_TITLE)
+public template vboilerplate(string M)
 {
     enum vboilerplate = q{
+    import tern.traits : isVector;
+
     alias T = typeof(this);
     alias U = typeof(data);
     alias E = typeof(data[0]);
-    alias M = }~MASK_TITLE~q{;
-    alias Z = z}~MASK_TITLE~q{;
+    alias M = }~M~q{;
 
     this(E hi, E lo) pure
     {
@@ -44,9 +45,11 @@ package template vboilerplate(string MASK_TITLE)
         this = val;
     }
 
-    this(const scope Z val) pure
+    /// Casting returns by-ref to make working with vectors easier, but this is a double-edged blade.
+    ref T opCast(T)() const pure
     {
-        this = val;
+        static assert(isVector!T, "May only cast SIM-D vectors to a vector type, not '"~fullIdentifier!T~"!'");
+        return *cast(T*)&this;
     }
 
     ref T opAssign(U arr) pure
@@ -64,12 +67,6 @@ package template vboilerplate(string MASK_TITLE)
     ref T opAssign(const scope M val) pure
     {
         data = (this & val.mask) | (val.data & ~val.mask);
-        return this;
-    }
-
-    ref T opAssign(const scope Z val) pure
-    {
-        this = val.state;
         return this;
     }
 
@@ -94,11 +91,6 @@ package template vboilerplate(string MASK_TITLE)
         return opBinary!(op, M)(val);
     }
 
-    T opBinary(string op)(const scope Z val) const pure
-    {
-        return opBinary!(op, Z)(val);
-    }
-
     ref T opOpAssign(string op)(const scope U val)
     {
         static foreach (i; 0..U.length)
@@ -114,12 +106,6 @@ package template vboilerplate(string MASK_TITLE)
     }
 
     ref T opOpAssign(string op)(const scope M val)
-    {
-        data = mixin("this "~op~" val");
-        return this;
-    }
-
-    ref T opOpAssign(string op)(const scope Z val)
     {
         data = mixin("this "~op~" val");
         return this;

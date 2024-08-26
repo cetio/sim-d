@@ -3,6 +3,7 @@ module simd.features;
 //version (GNU) public import gcc.builtins;
 version (LDC) public import ldc.simd;
 version (LDC) public import ldc.intrinsics;
+// https://github.com/etcimon/libwasm/blob/9513ad4ba0a9f7631c73650d4dd99bb4a21863bc/druntime/ldc/gccbuiltins_x86.di
 version (LDC) public import ldc.gccbuiltins_x86;
 version (LDC) public import ldc.llvmasm;
 

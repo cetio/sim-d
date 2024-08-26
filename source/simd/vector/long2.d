@@ -16,7 +16,7 @@ pragma(inline, true):
     mixin(vboilerplate!"mask64x2");
 
     long2 opBinary(string op, T)(scope T val) const pure
-        if (isM128!T || isZ128!T)
+        if (isM128!T)
     {
         static if (op == "+" && AVX512F && AVX512VL)
         {
@@ -100,23 +100,25 @@ pragma(inline, true):
     pragma(inline, true):
     auto shuffle16x8(const scope short[8] ctrl) const pure
     {
-        // Not supported yet on LDC stable
-        auto ret = inlineIR!(q{
-            %tmp = call <8 x i16> @llvm.x86.avx512.vpermi2var.hi.128(<8 x i16> %0, <8 x i16> %1, <8 x i16> %2)
-            ret <8 x i16> %tmp
-        }, __vector(short[8]), __vector(short[8]), __vector(short[8]), __vector(short[8]))(cast(__vector(short[8]))data, cast(__vector(short[8]))ctrl, cast(__vector(short[8]))data);
-        return *cast(long2*)&ret;
-        /* short[8] ret = void;
-        const short[8] data = cast(short[8])this.data;
-        ret[0] = data[ctrl[0]];
-        ret[1] = data[ctrl[1]];
-        ret[2] = data[ctrl[2]];
-        ret[3] = data[ctrl[3]];
-        ret[4] = data[ctrl[4]];
-        ret[5] = data[ctrl[5]];
-        ret[6] = data[ctrl[6]];
-        ret[7] = data[ctrl[7]];
-        return cast(long2)ret; */
+        static if (AVX512VL && AVX512BW)
+        {
+            auto ret = __builtin_ia32_vpermi2varhi128(cast(__vector(short[8]))cast(short[8])data, cast(__vector(short[8]))ctrl, cast(__vector(short[8]))cast(short[8])data);
+            return *cast(long2*)&ret;
+        }
+        else
+        {
+            short[8] ret = void;
+            const short[8] data = cast(short[8])this.data;
+            ret[0] = data[ctrl[0]];
+            ret[1] = data[ctrl[1]];
+            ret[2] = data[ctrl[2]];
+            ret[3] = data[ctrl[3]];
+            ret[4] = data[ctrl[4]];
+            ret[5] = data[ctrl[5]];
+            ret[6] = data[ctrl[6]];
+            ret[7] = data[ctrl[7]];
+            return cast(long2)ret;
+        }
     }
 
     pragma(inline, true):

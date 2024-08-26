@@ -2,10 +2,7 @@ module simd.mask.mask64x2;
 
 import simd;
 
-public alias mask64x2 = _mask64x2!false;
-public alias zmask64x2 = _mask64x2!true;
-
-align (32) private struct _mask64x2(bool ZEROED)
+align (32) public struct mask64x2
 {
 public:
 final:
@@ -75,6 +72,6 @@ pragma(inline, true):
         static if (SSE2)
             return cast(ubyte)__builtin_ia32_movmskpd(cast(__vector(double[2]))mask);
         else
-            return ((mask[0] == -1) << 0) | ((mask[1] == -1) << 1);
+            return (mask[0] & 0b00000001) | (mask[1] & 0b00000010);
     }
 }

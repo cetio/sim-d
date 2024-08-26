@@ -2,11 +2,20 @@
 	"authors": [
 		"cet"
 	],
+	"buildOptions": [
+		"debugInfo"
+	],
 	"copyright": "Copyright © 2024, cet",
+	"dependencies": {
+		"tern": "~>0.2.24"
+	},
 	"description": "A universal, fast, and simple SIMD library based on intel-intrinsics",
+	"dflags-dmd": [
+		"-mcpu=native"
+	],
+	"dflags-ldc": [
+		"-mcpu=native"
+	],
 	"license": "AGPL-3.0-only",
-	"name": "sim-d",
-    "buildOptions": ["debugInfo"],
-    "dflags-ldc": ["-mcpu=native"],
-    "dflags-dmd": ["-mcpu=native"]
+	"name": "sim-d"
 }

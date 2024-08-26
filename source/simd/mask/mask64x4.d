@@ -2,10 +2,7 @@ module simd.mask.mask64x4;
 
 import simd;
 
-public alias mask64x4 = _mask64x4!false;
-public alias zmask64x4 = _mask64x4!true;
-
-align (64) private struct _mask64x4(bool ZEROED)
+align (64) public struct mask64x4
 {
 public:
 final:

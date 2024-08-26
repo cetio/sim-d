@@ -2,10 +2,7 @@ module simd.mask.mask16x16;
 
 import simd;
 
-public alias mask16x16 = _mask16x16!false;
-public alias zmask16x16 = _mask16x16!true;
-
-align (64) private struct _mask16x16(bool ZEROED)
+align (64) public struct mask16x16
 {
 public:
 final:

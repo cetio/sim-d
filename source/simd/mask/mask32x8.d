@@ -2,10 +2,7 @@ module simd.mask.mask32x8;
 
 import simd;
 
-public alias mask32x8 = _mask32x8!false;
-public alias zmask32x8 = _mask32x8!true;
-
-align (64) private struct _mask32x8(bool ZEROED)
+align (64) public struct mask32x8
 {
 public:
 final:
