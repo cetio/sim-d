@@ -60,6 +60,82 @@ pragma(inline, true):
             return ret;
         }
     }
+
+    pragma(inline, true):
+    auto shuffle64x2(const scope long[2] ctrl) const pure
+    {
+        long[2] ret = void;
+        ret[0] = data[ctrl[0]];
+        ret[1] = data[ctrl[1]];
+        return cast(long[2])ret;
+    }
+
+    pragma(inline, true):
+    auto shuffle32x4(const scope int[4] ctrl) const pure @trusted
+    {
+        static if (AVX2)
+        {
+            // Defering initialization here has no impact on generation,
+            // but it looks better and ensures consistency across versions.
+            align (32) const int[8] nctrl = void;
+            align (32) const long[2] data = this.data;
+            // Output with this is identical to if we did what we're doing with data.
+            *cast(int[4]*)&nctrl = ctrl;
+
+            auto ret = __builtin_ia32_permvarsi256(*cast(__vector(int[8])*)&data, cast(__vector(int[8]))nctrl);
+            return *cast(long2*)&ret;
+        }
+        else
+        {
+            int[4] ret = void;
+            const int[4] data = cast(int[4])this.data;
+            ret[0] = data[ctrl[0]];
+            ret[1] = data[ctrl[1]];
+            ret[2] = data[ctrl[2]];
+            ret[3] = data[ctrl[3]];
+            return cast(long2)ret;
+        }
+    }
+
+    pragma(inline, true):
+    auto shuffle16x8(const scope short[8] ctrl) const pure
+    {
+        // Not supported yet on LDC stable
+        auto ret = inlineIR!(q{
+            %tmp = call <8 x i16> @llvm.x86.avx512.vpermi2var.hi.128(<8 x i16> %0, <8 x i16> %1, <8 x i16> %2)
+            ret <8 x i16> %tmp
+        }, __vector(short[8]), __vector(short[8]), __vector(short[8]), __vector(short[8]))(cast(__vector(short[8]))data, cast(__vector(short[8]))ctrl, cast(__vector(short[8]))data);
+        return *cast(long2*)&ret;
+        /* short[8] ret = void;
+        const short[8] data = cast(short[8])this.data;
+        ret[0] = data[ctrl[0]];
+        ret[1] = data[ctrl[1]];
+        ret[2] = data[ctrl[2]];
+        ret[3] = data[ctrl[3]];
+        ret[4] = data[ctrl[4]];
+        ret[5] = data[ctrl[5]];
+        ret[6] = data[ctrl[6]];
+        ret[7] = data[ctrl[7]];
+        return cast(long2)ret; */
+    }
+
+    pragma(inline, true):
+    auto shuffle8x16(const scope byte[16] ctrl) const pure @trusted
+    {
+        static if (SSSE3)
+        {
+            auto ret = __builtin_ia32_pshufb128(cast(__vector(byte[16]))data, cast(__vector(byte[16]))ctrl);
+            return *cast(long2*)&ret;
+        }
+        else
+        {
+            byte[16] ret = void;
+            const byte[16] data = cast(byte[16])data;
+            static foreach (i; 0..16)
+                ret[i] = data[ctrl[i]];
+            return cast(long2)ret;
+        }
+    }
 }
 /+ {
     long[2] data;

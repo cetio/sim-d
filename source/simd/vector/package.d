@@ -33,6 +33,22 @@ package template vboilerplate(string MASK_TITLE)
         data = arr;
     }
 
+    /// Broadcasts `val` to all elements. Not to be confused with `this(E hi, E lo)`.
+    this(E val) pure
+    {
+        data[] = val;
+    }
+
+    this(const scope M val) pure
+    {
+        this = val;
+    }
+
+    this(const scope Z val) pure
+    {
+        this = val;
+    }
+
     ref T opAssign(U arr) pure
     {
         data = arr;
@@ -44,8 +60,6 @@ package template vboilerplate(string MASK_TITLE)
         data = val.data;
         return this;
     }
-
-    // TODO: opAssign long/broadcast
 
     ref T opAssign(const scope M val) pure
     {
