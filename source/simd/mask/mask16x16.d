@@ -8,7 +8,8 @@ public:
 final:
 @nogc:
 pragma(inline, true):
-    alias pack = short;
+    alias K = short;
+    enum length = 16;
 
     short16 data;
     short16 mask;

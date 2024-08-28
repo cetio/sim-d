@@ -2,13 +2,15 @@ module simd.mask.mask64x2;
 
 import simd;
 
+// TODO: Mask boilerplate and make it work like vectors normally.
 align (32) public struct mask64x2
 {
 public:
 final:
 @nogc:
 pragma(inline, true):
-    alias pack = ubyte;
+    alias K = ubyte;
+    enum length = 2;
 
     long2 data;
     long2 mask;
@@ -29,9 +31,8 @@ pragma(inline, true):
         this.mask = mask;
     }
 
-    this(ubyte mask) pure
+    this(K mask) pure
     {
-        // TODO: AVX512 checks should be based on feature
         static if (AVX512DQ && AVX512VL)
         {
             auto ret = __asm!(__vector(long[2]))("
@@ -41,21 +42,18 @@ pragma(inline, true):
         }
         else
         { 
-            static foreach_reverse (i; 0..2)
-            {
-                this.mask[i] = (mask & 2) == 0 ? 0 : -1;
-                mask <<= 1;
-            }
+            static foreach_reverse (i; 0..length)
+                this.mask[i] = mask & (cast(K)1 << i);
         }
     }
 
-    this(long[2] val, ubyte mask) pure
+    this(long[2] val, K mask) pure
     {
         data = val;
         this(mask);
     }
 
-    long2 state() const pure
+    long2 state()
     {
         return data & mask;
     }
@@ -67,11 +65,16 @@ pragma(inline, true):
         return this;
     }
 
-    ubyte movmsk() const
+    K movmsk() const pure
     {
         static if (SSE2)
             return cast(ubyte)__builtin_ia32_movmskpd(cast(__vector(double[2]))mask);
         else
-            return (mask[0] & 0b00000001) | (mask[1] & 0b00000010);
+        {
+            K ret;
+            static foreach(i; 0..length)
+                ret |= mask[i] & (cast(K)1 << i);
+            return ret;
+        }    
     }
 }

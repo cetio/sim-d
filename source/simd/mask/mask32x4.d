@@ -8,7 +8,8 @@ public:
 final:
 @nogc:
 pragma(inline, true):
-    alias pack = ubyte;
+    alias K = ubyte;
+    enum length = 4;
 
     int4 data;
     int4 mask;

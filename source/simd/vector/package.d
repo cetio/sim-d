@@ -70,7 +70,9 @@ public template vboilerplate(string M)
         return this;
     }
 
-    T opBinary(string op)(const scope U val) const pure
+    // This weird generics shenanigans is intentional, meant to set the priority of this function as low as possible.
+    T opBinary(string op, D)(const scope D val) const pure
+        if (is(D == U))
     {
         T ret = this;
         static foreach (i; 0..U.length)
@@ -84,11 +86,6 @@ public template vboilerplate(string M)
         static foreach (i; 0..U.length)
             mixin("ret[i] "~op~"= val;");
         return ret;
-    }
-
-    T opBinary(string op)(const scope M val) const pure
-    {
-        return opBinary!(op, M)(val);
     }
 
     ref T opOpAssign(string op)(const scope U val)
@@ -126,13 +123,13 @@ public template vboilerplate(string M)
 
     M opSlice(size_t start, size_t end) const pure
     {
-        ubyte mask = (ubyte.max << start) & (ubyte.max >> ((M.pack.sizeof * 8) - end));
+        ubyte mask = (ubyte.max << start) & (ubyte.max >> ((M.K.sizeof * 8) - end));
         return M(this, mask);
     }
 
     M opSliceAssign(const scope U val, size_t start, size_t end) 
     {
-        ubyte mask = (ubyte.max << start) & (ubyte.max >> ((M.pack.sizeof * 8) - end));
+        ubyte mask = (ubyte.max << start) & (ubyte.max >> ((M.K.sizeof * 8) - end));
         M ret = M(this, mask);
         data = ret;
         return ret;
@@ -140,7 +137,7 @@ public template vboilerplate(string M)
 
     M opSliceOpAssign(string op)(const scope U val, size_t start, size_t end)
     {
-        ubyte mask = (ubyte.max << start) & (ubyte.max >> ((M.pack.sizeof * 8) - end));
+        ubyte mask = (ubyte.max << start) & (ubyte.max >> ((M.K.sizeof * 8) - end));
         M ret = M(this, mask);
         data = mixin("this "~op~" ret");
         return ret;

@@ -15,41 +15,41 @@ pragma(inline, true):
 
     mixin(vboilerplate!"mask64x2");
 
-    long2 opBinary(string op, T)(scope T val) const pure
-        if (isM128!T)
+    long2 opBinary(string op)(const scope M val) const pure
     {
+        pragma(msg, "aaa");
         static if (op == "+" && AVX512F && AVX512VL)
         {
             auto ret = __asm!(__vector(long[2]))("
-                vpaddq $1, $2, $1 {%k1} "~(isZ128!T ? "{z}" : "")
+                vpaddq $1, $2, $1 {%k1}"
             , "=v,v,v,{k1}", data, val.data, val.movmsk);
             return *cast(long2*)&ret;
         }
         else static if (op == "-" && AVX512F && AVX512VL2)
         {
             auto ret = __asm!(__vector(long[2]))("
-                vpsubq $1, $2, $1 {%k1} "~(isZ128!T ? "{z}" : "")
+                vpsubq $1, $2, $1 {%k1}"
             , "=v,v,v,{k1}", data, val.data, val.movmsk);
             return *cast(long2*)&ret;
         }
         else static if (op == "^" && AVX512F && AVX512VL)
         {
             auto ret = __asm!(__vector(long[2]))("
-                vpxorq $1, $2, $1 {%k1} "~(isZ128!T ? "{z}" : "")
+                vpxorq $1, $2, $1 {%k1}"
             , "=v,v,v,{k1}", cast(__vector(long[2]))data, val.data, val.movmsk);
             return *cast(long2*)&ret;
         }
         else static if (op == "|" && AVX512F && AVX512VL)
         {
             auto ret = __asm!(__vector(long[2]))("
-                vporq $1, $2, $1 {%k1} "~(isZ128!T ? "{z}" : "")
+                vporq $1, $2, $1 {%k1}"
             , "=v,v,v,{k1}", data, val.data, val.movmsk);
             return *cast(long2*)&ret;
         }
         else static if (op == "&" && AVX512F && AVX512VL)
         {
             auto ret = __asm!(__vector(long[2]))("
-                vpandq $1, $2, $1 {%k1} "~(isZ128!T ? "{z}" : "")
+                vpandq $1, $2, $1 {%k1}"
             , "=v,v,v,{k1}", data, val.data, val.movmsk);
             return *cast(long2*)&ret;
         }
@@ -61,7 +61,6 @@ pragma(inline, true):
         }
     }
 
-    pragma(inline, true):
     auto shuffle64x2(const scope long[2] ctrl) const pure
     {
         long[2] ret = void;
@@ -70,7 +69,6 @@ pragma(inline, true):
         return cast(long[2])ret;
     }
 
-    pragma(inline, true):
     auto shuffle32x4(const scope int[4] ctrl) const pure @trusted
     {
         static if (AVX2)
@@ -97,7 +95,6 @@ pragma(inline, true):
         }
     }
 
-    pragma(inline, true):
     auto shuffle16x8(const scope short[8] ctrl) const pure
     {
         static if (AVX512VL && AVX512BW)
@@ -121,7 +118,6 @@ pragma(inline, true):
         }
     }
 
-    pragma(inline, true):
     auto shuffle8x16(const scope byte[16] ctrl) const pure @trusted
     {
         static if (SSSE3)
