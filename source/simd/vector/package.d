@@ -12,12 +12,29 @@ public import simd.vector.short16;
 public import simd.vector.byte16;
 public import simd.vector.byte32;
 
+import std.traits;
+
+template ElementType(T) 
+{
+    static if (is(T == U[], U) || is(T == U*, U) || is(T U == U[L], size_t L))
+        alias ElementType = U;
+    else static if (isIndexable!T)
+    {
+        T _;
+        alias ElementType = typeof(_[0]);
+    }
+    else
+        alias ElementType = OriginalType!T;
+}
+
+enum isIndexable(T) = isDynamicArray!T || isStaticArray!T || 
+    __traits(compiles, { template t(T) { T v; auto t() => v[0]; } auto x = t!T; });
+enum isVector(T) = !isDynamicArray!T && isIndexable!T && isNumeric!(ElementType!T);
+
 /// Boilerplate mixin for all vector types.
 public template vboilerplate(string M)
 {
     enum vboilerplate = q{
-    import tern.traits : isVector;
-
     alias T = typeof(this);
     alias U = typeof(data);
     alias E = typeof(data[0]);

@@ -53,7 +53,7 @@ pragma(inline, true):
         this(mask);
     }
 
-    long2 state()
+    long2 state() const pure
     {
         return data & mask;
     }

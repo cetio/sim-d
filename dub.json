@@ -3,12 +3,10 @@
 		"cet"
 	],
 	"buildOptions": [
-		"debugInfo"
+		"debugInfo",
+		"betterC"
 	],
 	"copyright": "Copyright © 2024, cet",
-	"dependencies": {
-		"tern": "~>0.2.24"
-	},
 	"description": "A universal, fast, and simple SIMD library based on intel-intrinsics",
 	"dflags-dmd": [
 		"-mcpu=native"

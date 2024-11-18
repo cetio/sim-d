@@ -21,35 +21,35 @@ pragma(inline, true):
         static if (op == "+" && AVX512F && AVX512VL)
         {
             auto ret = __asm!(__vector(long[2]))("
-                vpaddq $1, $2, $1 {%k1}"
+                vpaddq $0, $2, $1 {%k1}"
             , "=v,v,v,{k1}", data, val.data, val.movmsk);
             return *cast(long2*)&ret;
         }
         else static if (op == "-" && AVX512F && AVX512VL2)
         {
             auto ret = __asm!(__vector(long[2]))("
-                vpsubq $1, $2, $1 {%k1}"
+                vpsubq $0, $2, $1 {%k1}"
             , "=v,v,v,{k1}", data, val.data, val.movmsk);
             return *cast(long2*)&ret;
         }
         else static if (op == "^" && AVX512F && AVX512VL)
         {
             auto ret = __asm!(__vector(long[2]))("
-                vpxorq $1, $2, $1 {%k1}"
+                vpxorq $0, $2, $1 {%k1}"
             , "=v,v,v,{k1}", cast(__vector(long[2]))data, val.data, val.movmsk);
             return *cast(long2*)&ret;
         }
         else static if (op == "|" && AVX512F && AVX512VL)
         {
             auto ret = __asm!(__vector(long[2]))("
-                vporq $1, $2, $1 {%k1}"
+                vporq $0, $2, $1 {%k1}"
             , "=v,v,v,{k1}", data, val.data, val.movmsk);
             return *cast(long2*)&ret;
         }
         else static if (op == "&" && AVX512F && AVX512VL)
         {
             auto ret = __asm!(__vector(long[2]))("
-                vpandq $1, $2, $1 {%k1}"
+                vpandq $0, $2, $1 {%k1}"
             , "=v,v,v,{k1}", data, val.data, val.movmsk);
             return *cast(long2*)&ret;
         }
